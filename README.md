@@ -26,7 +26,7 @@ This script performs the following:
 
 Basic usage:
 
-```bash
+```
 python train.py --input_dir flowers
 
 optional arguments:
@@ -79,7 +79,7 @@ This script performs the following:
 
 Basic usage:
 
-```bash
+```
 python predict.py --input_image flowers/test/1/image_06743.jpg
 
 optional arguments:
@@ -109,7 +109,7 @@ PREDICT_ARGS = [
 
 An expected output will look like this:
 
-```bash
+```
 Arguments passed:
 input_img: flowers/test/1/image_06743.jpg
 checkpoint: checkpoints/checkpoint.pth
