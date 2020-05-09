@@ -14,7 +14,7 @@ import json
 import argparse
 import consts
 from image import process_image
-from model_utils import select_pretrained_model, freeze_params, map_category_names, print_predictions, print_args
+from model_utils import set_device, select_pretrained_model, freeze_params, map_category_names, print_predictions, print_args
 from network import Network
 
 def init_argparse(*args):
@@ -33,7 +33,7 @@ def init_argparse(*args):
                         default=3)
     parser.add_argument('-n', '--category_names',
                         help='Use a mapping of categories to real names')
-    parser.add_argument('--gpu', help='Use GPU for training; Default is True',
+    parser.add_argument('--gpu', help='Use GPU for predictions; Default is True',
                        action='store_true',
                        default=True)
     # Initialize with constants if passed in as an argument
@@ -70,9 +70,12 @@ def load_checkpoint(path):
     return model
 
 
-def predict(image_path, model, k):
+def predict(image_path, model, k, cuda):
     ''' Predict the class (or classes) of an image using a trained deep learning model.
     '''
+    # Use CUDA if available
+    device = set_device(cuda)
+    model.to(device)
 
     # Disable dropout
     model.eval()
@@ -80,16 +83,11 @@ def predict(image_path, model, k):
     # Disable autograd
     with torch.no_grad():
         # Process image to PyTorch tensor
-        img = process_image(image_path)
+        img = process_image(image_path).to(device)
+
         # Need to unsqueeze for a single image
         # Ref: https://discuss.pytorch.org/t/expected-stride-to-be-a-single-integer-value-or-a-list/17612/4
         img.unsqueeze_(0)
-
-        # Hack to get around "RunTimeError Expected object of type
-        # torch.FloatTensor but found type torch.cuda.FloatTensor for argument #2 'weight'"
-        # Ref: https://knowledge.udacity.com/questions/131608
-        model.to('cpu')
-        img.to('cpu')
 
         # Get probability distribution
         output = model(img)
@@ -116,8 +114,7 @@ if __name__ == '__main__':
     args = init_argparse(consts.PREDICT_ARGS)
     print_args(args)
     model = load_checkpoint(args.checkpoint)
-    probs, classes = predict(image_path=args.input_img, model=model, k=args.top_k)
+    probs, classes = predict(image_path=args.input_img, model=model, k=args.top_k, cuda=args.gpu)
     pred_labels = map_category_names(cat_to_name=args.category_names,
                                      classes=classes)
     print_predictions(pred_labels, probs)
-
