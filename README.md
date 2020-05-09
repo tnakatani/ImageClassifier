@@ -1,5 +1,7 @@
 # Creating a Flower Image Classifier Using Transfer Learning
 
+The project was completed as part of the [Intro to Machine Learning with PyTorch Nanodegree Program](https://www.udacity.com/course/intro-to-machine-learning-nanodegree--nd229).
+
 This project develops an image classifier trained on a [data set](http://www.robots.ox.ac.uk/~vgg/data/flowers/102/index.html) of flower images shared by the [Visual Geometry Group](http://www.robots.ox.ac.uk/~vgg/).  The model is constructed using a pretrained model from [`torchvision`](https://pytorch.org/docs/stable/torchvision/models.html) with a feedforward classifier appended to the output stage.
 
 The project was developed in 2 stages:
