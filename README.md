@@ -20,7 +20,7 @@ The functionality of the application is mainly divided into two scripts, `train.
 
 This script performs the following:
 
-1. Trains a new network on a dataset.
+1. Trains a new network on a dataset.  Runs on GPU if available, otherwise falls back to CPU.
 2. Prints out training loss, validation loss, and validation accuracy as the network trains.  Additionally stores the output in `train_log.txt`.
 3. After the training is complete, saves a checkpoint in the `checkpoint` directory.
 
