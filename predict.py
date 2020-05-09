@@ -17,6 +17,7 @@ from image import process_image
 from model_utils import set_device, select_pretrained_model, freeze_params, map_category_names, print_predictions, print_args
 from network import Network
 
+
 def init_argparse(*args):
     """Instantiate argparse object"""
     parser = argparse.ArgumentParser(
@@ -33,17 +34,28 @@ def init_argparse(*args):
                         default=3)
     parser.add_argument('-n', '--category_names',
                         help='Use a mapping of categories to real names')
-    parser.add_argument('--gpu', help='Use GPU for predictions; Default is True',
-                       action='store_true',
-                       default=True)
+    parser.add_argument('--gpu',
+                        help='Use GPU for predictions; Default is True',
+                        action='store_true',
+                        default=True)
     # Initialize with constants if passed in as an argument
     if args:
         return parser.parse_args(args[0])
     return parser.parse_args()
 
 
-def load_checkpoint(path):
-    checkpoint = torch.load(path)
+def load_checkpoint(path, cuda):
+    """Load a checkpoint and rebuild the model
+
+    Args:
+        path: Path to checkpoint file
+
+    Returns:
+        model: Recreation of the saved model
+    """
+    device = set_device(cuda)
+
+    checkpoint = torch.load(path, map_location=device)
 
     # Load pretrained model
     model = select_pretrained_model(checkpoint['pretrained_model'])
@@ -53,9 +65,9 @@ def load_checkpoint(path):
 
     # Load classifier
     classifier = Network(checkpoint['input_size'],
-                 checkpoint['output_size'],
-                 checkpoint['hidden_layers'],
-                 checkpoint['drop_p'])
+                         checkpoint['output_size'],
+                         checkpoint['hidden_layers'],
+                         checkpoint['drop_p'])
     classifier.load_state_dict(checkpoint['state_dict'])
 
     # Merge classifier to end of pretrained model
@@ -71,7 +83,18 @@ def load_checkpoint(path):
 
 
 def predict(image_path, model, k, cuda):
-    ''' Predict the class (or classes) of an image using a trained deep learning model.
+    ''' Predict the class (or classes) of an image using a
+    trained deep learning model.
+
+    Args:
+        image_path: Path of image to be classified
+        model: Model to classify the image
+        k: Number of predictions to return
+        cuda: Run prediction with cuda
+
+    Returns:
+        probs: Probabilities for each class prediction
+        classes: Class predictions
     '''
     # Use CUDA if available
     device = set_device(cuda)
@@ -113,7 +136,7 @@ if __name__ == '__main__':
     logging.basicConfig(filename='predict_log.txt', level=logging.INFO)
     args = init_argparse(consts.PREDICT_ARGS)
     print_args(args)
-    model = load_checkpoint(args.checkpoint)
+    model = load_checkpoint(args.checkpoint, args.gpu)
     probs, classes = predict(image_path=args.input_img, model=model, k=args.top_k, cuda=args.gpu)
     pred_labels = map_category_names(cat_to_name=args.category_names,
                                      classes=classes)
