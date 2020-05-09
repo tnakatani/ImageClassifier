@@ -92,7 +92,7 @@ optional arguments:
                         Return n most likely classes
   -n CATEGORY_NAMES, --category_names CATEGORY_NAMES
                         Use a mapping of categories to real names
-  --gpu                 Use GPU for training; Default is True
+  --gpu                 Use GPU for predictions; Default is True
 ```
 
 `predict.py` currently runs the following arguments set in the `consts.py` file:
